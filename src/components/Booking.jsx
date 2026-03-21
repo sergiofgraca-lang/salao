@@ -27,7 +27,7 @@ function Booking({ onConfirm }) {
             padding: "15px",
             marginBottom: "15px",
             borderRadius: "15px",
-            background: selectedService?.id === service.id ? "#ffd54f" : "#2c2c2c",
+            background: selectedService?.id === service.id ? "#1d1b1b" : "#ccda10",
             cursor: "pointer"
           }}
         >
