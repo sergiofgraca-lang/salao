@@ -45,8 +45,9 @@ useEffect(() => {
           setCurrentTab={setCurrentTab}
         />
       </div>
+      <h1>TESTE VERCEL 🔥</h1>
     </div>
   )
 }
-<h1>TESTE VERCEL 🔥</h1>
+
 export default App
