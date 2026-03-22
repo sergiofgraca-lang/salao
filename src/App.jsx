@@ -45,6 +45,7 @@ useEffect(() => {
           setCurrentTab={setCurrentTab}
         />
       </div>
+      <h1 style={{color: 'red'}}>VERSÃO NOVA</h1>
     </div>
   )
 }
