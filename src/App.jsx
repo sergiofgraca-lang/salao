@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react"
+import { FaCut } from "react-icons/fa"
 import "./App.css"
 
 const horariosDisponiveis = [
@@ -42,6 +43,11 @@ function App() {
           <div className="content">
             <h1>Salão Meneses</h1>
 
+            {/* ✂️ TESOURA ANIMADA */}
+            <div className="scissor-container">
+              <FaCut className="scissor" />
+            </div>
+
             <button className="primary-btn" onClick={() => setScreen("services")}>
               👤 Cliente
             </button>
@@ -49,6 +55,11 @@ function App() {
             <button className="secondary-btn" onClick={() => setScreen("login")}>
               🔐 Profissional
             </button>
+
+            
+            <h1>Seja bem vindo ao melhor são da região, Sérgio Graça
+              
+               2026</h1>
           </div>
         )}
 
@@ -74,112 +85,124 @@ function App() {
               Escova - R$ 50
             </button>
 
+            <button className="card" onClick={() => setScreen("booking")}>
+              Progressiva - R$ 80
+            </button>
+
           </div>
         )}
 
         {/* 📅 AGENDAMENTO */}
-        {screen === "booking" && (
-          <div className="content">
+{screen === "booking" && (
+  <div className="content">
 
-            <button className="back-btn" onClick={() => setScreen("services")}>
-              ⬅ Voltar
-            </button>
+    <button className="back-btn" onClick={() => setScreen("services")}>
+      ⬅ Voltar
+    </button>
 
-            <h2>Agendamento</h2>
+    <h2>Agendamento</h2>
 
-            <input
-              placeholder="Nome"
-              className="input"
-              value={nome}
-              onChange={(e) => setNome(e.target.value)}
-            />
+    <div className="booking-box">
 
-            <input
-              placeholder="Telefone"
-              className="input"
-              value={telefone}
-              onChange={(e) => setTelefone(e.target.value)}
-            />
+      <input
+        placeholder="Nome"
+        className="input"
+        value={nome}
+        onChange={(e) => setNome(e.target.value)}
+      />
 
-            <input
-              type="date"
-              className="input"
-              value={selectedDate}
-              onChange={(e) => setSelectedDate(e.target.value)}
-            />
+      <input
+        placeholder="Telefone"
+        className="input"
+        value={telefone}
+        onChange={(e) => setTelefone(e.target.value)}
+      />
 
-            <h3>Horários disponíveis</h3>
+      <input
+        type="date"
+        className="input"
+        value={selectedDate}
+        onChange={(e) => setSelectedDate(e.target.value)}
+      />
 
-            {!selectedDate && <p>Escolha uma data primeiro</p>}
+      <h3>Horários disponíveis</h3>
 
-            {selectedDate &&
-              horariosFiltrados.map((h) => (
-                <button
-                  key={h}
-                  className={`card ${selectedTime === h ? "selected" : ""}`}
-                  onClick={() => setSelectedTime(h)}
-                >
-                  {h}
-                </button>
-              ))
-            }
+      {!selectedDate && <p>Escolha uma data primeiro</p>}
 
+      {selectedDate && (
+        <div className="horarios-grid">
+          {horariosFiltrados.map((h) => (
             <button
-              className="primary-btn"
-              onClick={() => {
-                if (!nome || !telefone || !selectedDate || !selectedTime) {
-                  alert("Preencha tudo!")
-                  return
-                }
-
-                const novo = {
-                  nome,
-                  telefone,
-                  data: selectedDate,
-                  horario: selectedTime
-                }
-
-                setAppointments([...appointments, novo])
-
-                alert("Agendamento realizado!")
-
-                setNome("")
-                setTelefone("")
-                setSelectedDate("")
-                setSelectedTime("")
-                setScreen("home")
-              }}
+              key={h}
+              className={`card ${selectedTime === h ? "selected" : ""}`}
+              onClick={() => setSelectedTime(h)}
             >
-              Confirmar Agendamento
+              {h}
             </button>
+          ))}
+        </div>
+      )}
 
-          </div>
-        )}
+      <button
+        className="primary-btn"
+        onClick={() => {
+          if (!nome || !telefone || !selectedDate || !selectedTime) {
+            alert("Preencha tudo!")
+            return
+          }
 
-        {/* 🔐 LOGIN PROFISSIONAL */}
-        {screen === "login" && (
-          <div className="content">
+          const novo = {
+            nome,
+            telefone,
+            data: selectedDate,
+            horario: selectedTime
+          }
 
-            <button className="back-btn" onClick={() => setScreen("home")}>
-              ⬅ Voltar
-            </button>
+          setAppointments([...appointments, novo])
 
-            <h2>Login Profissional</h2>
+          alert("Agendamento realizado!")
 
-            <input placeholder="Usuário" className="input" />
-            <input placeholder="Senha" type="password" className="input" />
+          setNome("")
+          setTelefone("")
+          setSelectedDate("")
+          setSelectedTime("")
+          setScreen("home")
+        }}
+      >
+        Confirmar Agendamento
+      </button>
 
-            <button
-              className="primary-btn"
-              onClick={() => setScreen("painel")}
-            >
-              Entrar
-            </button>
+    </div>
 
-          </div>
-        )}
+  </div>
+)}
 
-        {/* 👨‍💼 PAINEL PROFISSIONAL */}
+       {/* 🔐 LOGIN */}
+{screen === "login" && (
+  <div className="content">
+
+    <button className="back-btn" onClick={() => setScreen("home")}>
+      ⬅ Voltar
+    </button>
+
+    <h2>Login Profissional</h2>
+
+    <div className="login-box">
+      <input placeholder="Usuário" className="input" />
+      <input placeholder="Senha" type="password" className="input" />
+
+      <button
+        className="primary-btn"
+        onClick={() => setScreen("painel")}
+      >
+        Entrar
+      </button>
+    </div>
+
+  </div>
+)}
+
+        {/* 👨‍💼 PAINEL */}
         {screen === "painel" && (
           <div className="content">
 
@@ -216,6 +239,5 @@ function App() {
     </div>
   )
 }
-<h1>TESTE GIT</h1>
 
 export default App
