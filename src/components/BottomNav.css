@@ -2,19 +2,19 @@
   display: flex;
   justify-content: space-around;
   padding: 15px 0;
-  background: white;
-  border-top: 1px solid #eee;
+  background: rgb(6, 6, 6);
+  border-top: 1px solid #e60909;
 }
 
 .bottom-nav button {
   background: none;
   border: none;
   font-size: 14px;
-  color: #888;
+  color: #f6f3f3;
   cursor: pointer;
 }
 
 .bottom-nav button.active {
-  color: #7b2ff7;
+  color: #2ff778;
   font-weight: bold;
 }
