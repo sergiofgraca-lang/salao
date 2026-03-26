@@ -14,6 +14,8 @@ const horariosDisponiveis = [
 function App() {
   const [screen, setScreen] = useState("home")
 
+  const [clientes, setClientes] = useState([])
+
   const [appointments, setAppointments] = useState(() => {
     const saved = localStorage.getItem("appointments")
     return saved ? JSON.parse(saved) : []
@@ -24,9 +26,18 @@ function App() {
   const [nome, setNome] = useState("")
   const [telefone, setTelefone] = useState("")
 
+  // salvar local
   useEffect(() => {
     localStorage.setItem("appointments", JSON.stringify(appointments))
   }, [appointments])
+
+  // buscar clientes do Django
+  useEffect(() => {
+    fetch("http://127.0.0.1:8000/clientes")
+      .then(res => res.json())
+      .then(data => setClientes(data))
+      .catch(err => console.log(err))
+  }, [])
 
   const horariosFiltrados = horariosDisponiveis.filter(horario => {
     return !appointments.some(
@@ -38,12 +49,11 @@ function App() {
     <div className="app">
       <div className="phone">
 
-        {/* 🏠 HOME */}
+        {/* HOME */}
         {screen === "home" && (
           <div className="content">
             <h1>Salão Meneses</h1>
 
-            {/* ✂️ TESOURA ANIMADA */}
             <div className="scissor-container">
               <FaCut className="scissor" />
             </div>
@@ -55,18 +65,12 @@ function App() {
             <button className="secondary-btn" onClick={() => setScreen("login")}>
               🔐 Profissional
             </button>
-
-            
-            <h1>Seja bem vindo ao melhor são da região, Sérgio Graça
-              
-               2026</h1>
           </div>
         )}
 
-        {/* 💇 SERVIÇOS */}
+        {/* SERVIÇOS */}
         {screen === "services" && (
           <div className="content">
-
             <button className="back-btn" onClick={() => setScreen("home")}>
               ⬅ Voltar
             </button>
@@ -88,124 +92,134 @@ function App() {
             <button className="card" onClick={() => setScreen("booking")}>
               Progressiva - R$ 80
             </button>
-
           </div>
         )}
 
-        {/* 📅 AGENDAMENTO */}
-{screen === "booking" && (
-  <div className="content">
-
-    <button className="back-btn" onClick={() => setScreen("services")}>
-      ⬅ Voltar
-    </button>
-
-    <h2>Agendamento</h2>
-
-    <div className="booking-box">
-
-      <input
-        placeholder="Nome"
-        className="input"
-        value={nome}
-        onChange={(e) => setNome(e.target.value)}
-      />
-
-      <input
-        placeholder="Telefone"
-        className="input"
-        value={telefone}
-        onChange={(e) => setTelefone(e.target.value)}
-      />
-
-      <input
-        type="date"
-        className="input"
-        value={selectedDate}
-        onChange={(e) => setSelectedDate(e.target.value)}
-      />
-
-      <h3>Horários disponíveis</h3>
-
-      {!selectedDate && <p>Escolha uma data primeiro</p>}
-
-      {selectedDate && (
-        <div className="horarios-grid">
-          {horariosFiltrados.map((h) => (
-            <button
-              key={h}
-              className={`card ${selectedTime === h ? "selected" : ""}`}
-              onClick={() => setSelectedTime(h)}
-            >
-              {h}
+        {/* AGENDAMENTO */}
+        {screen === "booking" && (
+          <div className="content">
+            <button className="back-btn" onClick={() => setScreen("services")}>
+              ⬅ Voltar
             </button>
-          ))}
-        </div>
-      )}
 
-      <button
-        className="primary-btn"
-        onClick={() => {
-          if (!nome || !telefone || !selectedDate || !selectedTime) {
-            alert("Preencha tudo!")
-            return
-          }
+            <h2>Agendamento</h2>
 
-          const novo = {
-            nome,
-            telefone,
-            data: selectedDate,
-            horario: selectedTime
-          }
+            <div className="form-box">
+              <input
+                placeholder="Nome"
+                className="input"
+                value={nome}
+                onChange={(e) => setNome(e.target.value)}
+              />
 
-          setAppointments([...appointments, novo])
+              <input
+                placeholder="Telefone"
+                className="input"
+                value={telefone}
+                onChange={(e) => setTelefone(e.target.value)}
+              />
 
-          alert("Agendamento realizado!")
+              <input
+                type="date"
+                className="input"
+                value={selectedDate}
+                onChange={(e) => setSelectedDate(e.target.value)}
+              />
+            </div>
 
-          setNome("")
-          setTelefone("")
-          setSelectedDate("")
-          setSelectedTime("")
-          setScreen("home")
-        }}
-      >
-        Confirmar Agendamento
-      </button>
+            <h3>Horários disponíveis</h3>
 
-    </div>
+            {!selectedDate && <p>Escolha uma data primeiro</p>}
 
-  </div>
-)}
+            <div className="grid">
+              {selectedDate &&
+                horariosFiltrados.map((h) => (
+                  <button
+                    key={h}
+                    className={`card ${selectedTime === h ? "selected" : ""}`}
+                    onClick={() => setSelectedTime(h)}
+                  >
+                    {h}
+                  </button>
+                ))}
+            </div>
 
-       {/* 🔐 LOGIN */}
-{screen === "login" && (
-  <div className="content">
+            <button
+  className="primary-btn"
+  onClick={async () => {
+    if (!nome || !telefone || !selectedDate || !selectedTime) {
+      alert("Preencha tudo!")
+      return
+    }
 
-    <button className="back-btn" onClick={() => setScreen("home")}>
-      ⬅ Voltar
-    </button>
+    const novo = {
+      nome,
+      telefone,
+      data: selectedDate,
+      horario: selectedTime
+    }
 
-    <h2>Login Profissional</h2>
+    try {
+      // 🔥 salva no Django
+      await fetch("http://127.0.0.1:8000/clientes", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          nome: nome,
+          telefone: telefone
+        })
+      })
 
-    <div className="login-box">
-      <input placeholder="Usuário" className="input" />
-      <input placeholder="Senha" type="password" className="input" />
+      // 🔥 salva no frontend (mantém seu sistema funcionando)
+      setAppointments([...appointments, novo])
 
-      <button
-        className="primary-btn"
-        onClick={() => setScreen("painel")}
-      >
-        Entrar
-      </button>
-    </div>
+      alert("Agendamento realizado com sucesso!")
 
-  </div>
-)}
+      setNome("")
+      setTelefone("")
+      setSelectedDate("")
+      setSelectedTime("")
+      setScreen("home")
 
-        {/* 👨‍💼 PAINEL */}
+    } catch (erro) {
+      console.error(erro)
+      alert("Erro ao salvar no servidor")
+    }
+  }}
+>
+  Confirmar Agendamento
+</button>
+          </div>
+        )}
+
+        {/* LOGIN */}
+        {screen === "login" && (
+          <div className="content center">
+            <button className="back-btn" onClick={() => setScreen("home")}>
+              ⬅ Voltar
+            </button>
+
+            <h2>Login Profissional</h2>
+
+            <div className="form-box">
+              <input placeholder="Usuário" className="input" />
+              <input placeholder="Senha" type="password" className="input" />
+            </div>
+
+            <button
+              className="primary-btn"
+              onClick={() => setScreen("painel")}
+            >
+              Entrar
+            </button>
+          </div>
+        )}
+
+        {/* PAINEL */}
         {screen === "painel" && (
           <div className="content">
-
             <button className="back-btn" onClick={() => setScreen("home")}>
               ⬅ Voltar
             </button>
@@ -232,6 +246,18 @@ function App() {
               </div>
             ))}
 
+            {/* 👇 CLIENTES DO DJANGO */}
+            <h3>Clientes cadastrados (Banco)</h3>
+
+            {clientes.length === 0 ? (
+              <p>Nenhum cliente no banco</p>
+            ) : (
+              clientes.map(c => (
+                <div key={c.id} className="card">
+                  {c.nome} - {c.telefone}
+                </div>
+              ))
+            )}
           </div>
         )}
 

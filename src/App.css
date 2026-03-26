@@ -179,3 +179,44 @@ h1, h2, h3 {
   padding: 10px;
   font-size: 14px;
 }
+/* CENTRALIZAÇÃO PROFISSIONAL */
+.center {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+/* FORMULÁRIOS */
+.form-box {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 15px;
+}
+
+/* GRID DE HORÁRIOS */
+.grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+}
+
+/* TESOURA */
+.scissor-container {
+  display: flex;
+  justify-content: center;
+  margin: 20px 0;
+}
+
+.scissor {
+  font-size: 70px;
+  color: gold;
+  filter: drop-shadow(0 0 12px gold);
+  animation: cortar 1s infinite ease-in-out;
+}
+
+@keyframes cortar {
+  0% { transform: rotate(-25deg); }
+  50% { transform: rotate(5deg); }
+  100% { transform: rotate(-25deg); }
+}
