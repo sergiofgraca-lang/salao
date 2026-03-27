@@ -13,32 +13,36 @@ const horariosDisponiveis = [
 
 function App() {
   const [screen, setScreen] = useState("home")
-
   const [clientes, setClientes] = useState([])
-
-  const [appointments, setAppointments] = useState(() => {
-    const saved = localStorage.getItem("appointments")
-    return saved ? JSON.parse(saved) : []
-  })
+  const [appointments, setAppointments] = useState([])
 
   const [selectedDate, setSelectedDate] = useState("")
   const [selectedTime, setSelectedTime] = useState("")
   const [nome, setNome] = useState("")
   const [telefone, setTelefone] = useState("")
 
-  // salvar local
-  useEffect(() => {
-    localStorage.setItem("appointments", JSON.stringify(appointments))
-  }, [appointments])
+  // 🔥 carregar agendamentos do banco
+  const carregarAgendamentos = () => {
+    fetch("https://salao-backend-4rit.onrender.com/agendamentos")
+      .then(res => res.json())
+      .then(data => setAppointments(data))
+      .catch(err => console.log(err))
+  }
 
-  // buscar clientes do Django
+  // 🔥 carregar ao abrir
   useEffect(() => {
-    fetch("http://127.0.0.1:8000/clientes")
+    carregarAgendamentos()
+  }, [])
+
+  // 🔥 buscar clientes
+  useEffect(() => {
+    fetch("https://salao-backend-4rit.onrender.com/clientes")
       .then(res => res.json())
       .then(data => setClientes(data))
       .catch(err => console.log(err))
   }, [])
 
+  // 🔥 filtrar horários ocupados
   const horariosFiltrados = horariosDisponiveis.filter(horario => {
     return !appointments.some(
       ag => ag.data === selectedDate && ag.horario === horario
@@ -145,52 +149,56 @@ function App() {
             </div>
 
             <button
-  className="primary-btn"
-  onClick={async () => {
-    if (!nome || !telefone || !selectedDate || !selectedTime) {
-      alert("Preencha tudo!")
-      return
-    }
+              className="primary-btn"
+              onClick={async () => {
+  if (!nome || !telefone || !selectedDate || !selectedTime) {
+    alert("Preencha tudo!")
+    return
+  }
 
-    const novo = {
-      nome,
-      telefone,
-      data: selectedDate,
-      horario: selectedTime
-    }
-
-    try {
-      // 🔥 salva no Django
-      await fetch("http://127.0.0.1:8000/clientes", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify({
-          nome: nome,
-          telefone: telefone
-        })
+  try {
+    // ✅ 1. SALVAR CLIENTE
+    await fetch("https://salao-backend-4rit.onrender.com/clientes/criar", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        nome,
+        telefone
       })
+    })
 
-      // 🔥 salva no frontend (mantém seu sistema funcionando)
-      setAppointments([...appointments, novo])
+    // ✅ 2. SALVAR AGENDAMENTO
+    await fetch("https://salao-backend-4rit.onrender.com/agendamentos/criar", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        nome,
+        telefone,
+        data: selectedDate,
+        horario: selectedTime
+      })
+    })
 
-      alert("Agendamento realizado com sucesso!")
+    alert("Agendamento realizado com sucesso!")
 
-      setNome("")
-      setTelefone("")
-      setSelectedDate("")
-      setSelectedTime("")
-      setScreen("home")
+    setNome("")
+    setTelefone("")
+    setSelectedDate("")
+    setSelectedTime("")
+    setScreen("home")
 
-    } catch (erro) {
-      console.error(erro)
-      alert("Erro ao salvar no servidor")
-    }
-  }}
->
-  Confirmar Agendamento
-</button>
+  } catch (erro) {
+    console.error(erro)
+    alert("Erro ao salvar")
+  }
+}}
+            >
+              Confirmar Agendamento
+            </button>
           </div>
         )}
 
@@ -228,25 +236,18 @@ function App() {
 
             {appointments.length === 0 && <p>Nenhum agendamento</p>}
 
-            {appointments.map((ag, index) => (
-              <div key={index} className="card">
+            {appointments.map((ag) => (
+              <div key={ag.id} className="card">
                 <p><strong>{ag.nome}</strong></p>
                 <p>{ag.telefone}</p>
                 <p>{ag.data} - {ag.horario}</p>
 
-                <button
-                  className="secondary-btn"
-                  onClick={() => {
-                    const novaLista = appointments.filter((_, i) => i !== index)
-                    setAppointments(novaLista)
-                  }}
-                >
-                  ❌ Excluir
+                <button className="secondary-btn">
+                  ❌ (vamos ligar no banco depois)
                 </button>
               </div>
             ))}
 
-            {/* 👇 CLIENTES DO DJANGO */}
             <h3>Clientes cadastrados (Banco)</h3>
 
             {clientes.length === 0 ? (
